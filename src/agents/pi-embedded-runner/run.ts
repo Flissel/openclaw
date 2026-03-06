@@ -1400,6 +1400,7 @@ export async function runEmbeddedPiAgent(
             `embedded run done: runId=${params.runId} sessionId=${params.sessionId} durationMs=${Date.now() - started} aborted=${aborted}`,
           );
           if (lastProfileId) {
+            overloadFailoverAttempts = 0;
             await markAuthProfileGood({
               store: authStore,
               provider,
