@@ -189,8 +189,7 @@ function isSystemctlBusUnavailable(detail: string): boolean {
     normalized.includes("failed to connect to user scope bus") ||
     normalized.includes("dbus_session_bus_address") ||
     normalized.includes("xdg_runtime_dir") ||
-    normalized.includes("no medium found") ||
-    normalized.includes("connection refused")
+    normalized.includes("no medium found")
   );
 }
 
@@ -203,7 +202,11 @@ function isGenericSystemctlIsEnabledFailure(detail: string): boolean {
     normalized.startsWith("command failed: systemctl") &&
     normalized.includes(" is-enabled ") &&
     !normalized.includes("permission denied") &&
-    !normalized.includes("access denied")
+    !normalized.includes("access denied") &&
+    !normalized.includes("no space left") &&
+    !normalized.includes("read-only file system") &&
+    !normalized.includes("out of memory") &&
+    !normalized.includes("cannot allocate memory")
   );
 }
 

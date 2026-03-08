@@ -224,6 +224,23 @@ describe("isSystemdServiceEnabled", () => {
     expect(result).toBe(false);
   });
 
+  it("throws when generic wrapper errors report infrastructure failures", async () => {
+    const { isSystemdServiceEnabled } = await import("./systemd.js");
+    mockManagedUnitPresent();
+    execFileMock.mockImplementationOnce((_cmd, args, _opts, cb) => {
+      expect(args).toEqual(["--user", "is-enabled", "openclaw-gateway.service"]);
+      const err = new Error(
+        "Command failed: systemctl --user is-enabled openclaw-gateway.service",
+      ) as Error & { code?: number };
+      err.code = 1;
+      cb(err, "", "read-only file system");
+    });
+
+    await expect(
+      isSystemdServiceEnabled({ env: { HOME: "/tmp/openclaw-test-home" } }),
+    ).rejects.toThrow("systemctl is-enabled unavailable: read-only file system");
+  });
+
   it("throws when systemctl is-enabled fails for non-state errors", async () => {
     const { isSystemdServiceEnabled } = await import("./systemd.js");
     mockManagedUnitPresent();
