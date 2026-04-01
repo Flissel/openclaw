@@ -1,0 +1,78 @@
+{
+  "id": "hotel-concierge",
+  "uiHints": {
+    "qdrantUrl": {
+      "label": "Qdrant URL",
+      "placeholder": "http://qdrant:6333",
+      "help": "URL of the Qdrant vector database"
+    },
+    "ollamaUrl": {
+      "label": "Ollama URL",
+      "placeholder": "http://ollama:11434",
+      "help": "URL of the Ollama instance for embeddings and chat"
+    },
+    "embeddingModel": {
+      "label": "Embedding Model",
+      "placeholder": "nomic-embed-text",
+      "help": "Ollama model used for text embeddings"
+    },
+    "hotelId": {
+      "label": "Hotel ID",
+      "placeholder": "wasserburg",
+      "help": "Unique identifier for this hotel installation"
+    },
+    "maxAccessDays": {
+      "label": "Max Access Days",
+      "placeholder": "4",
+      "help": "Maximum number of days a guest can register for"
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "qdrantUrl": {
+        "type": "string",
+        "default": "http://qdrant:6333"
+      },
+      "qdrantCollection": {
+        "type": "string",
+        "default": "hotel_knowledge"
+      },
+      "ollamaUrl": {
+        "type": "string",
+        "default": "http://ollama:11434"
+      },
+      "embeddingModel": {
+        "type": "string",
+        "default": "nomic-embed-text"
+      },
+      "embeddingDimensions": {
+        "type": "number",
+        "default": 768
+      },
+      "hotelId": {
+        "type": "string",
+        "default": "wasserburg"
+      },
+      "maxAccessDays": {
+        "type": "number",
+        "default": 4,
+        "minimum": 1,
+        "maximum": 30
+      },
+      "ragTopK": {
+        "type": "number",
+        "default": 5
+      },
+      "ragMinScore": {
+        "type": "number",
+        "default": 0.6
+      },
+      "language": {
+        "type": "string",
+        "default": "de"
+      }
+    }
+  }
+}

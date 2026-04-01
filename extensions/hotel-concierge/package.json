@@ -1,0 +1,24 @@
+{
+  "name": "@openclaw/hotel-concierge",
+  "version": "2026.3.13",
+  "private": true,
+  "description": "Hotel concierge WhatsApp bot with dynamic guest allowlist, Qdrant RAG, and admin document upload",
+  "type": "module",
+  "dependencies": {
+    "@qdrant/js-client-rest": "^1.12.0",
+    "@sinclair/typebox": "0.34.48",
+    "openai": "^6.27.0",
+    "pdf-parse": "^1.1.1",
+    "mammoth": "^1.8.0",
+    "busboy": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/busboy": "^1.5.4",
+    "@types/pdf-parse": "^1.1.4"
+  },
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}

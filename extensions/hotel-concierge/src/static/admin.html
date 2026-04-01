@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hotel Concierge - Admin</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5; color: #333; padding: 20px;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 24px; margin-bottom: 8px; }
+    .subtitle { color: #666; font-size: 14px; margin-bottom: 24px; }
+
+    .section {
+      background: #fff; border-radius: 12px; padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px;
+    }
+    .section h2 { font-size: 18px; margin-bottom: 16px; color: #444; }
+
+    .upload-zone {
+      border: 2px dashed #ccc; border-radius: 8px; padding: 32px;
+      text-align: center; cursor: pointer; transition: border-color 0.2s;
+      margin-bottom: 16px;
+    }
+    .upload-zone:hover, .upload-zone.dragover { border-color: #667eea; background: #f8f9ff; }
+    .upload-zone p { color: #888; font-size: 14px; }
+    .upload-zone .formats { font-size: 12px; color: #aaa; margin-top: 8px; }
+
+    .upload-controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .upload-controls select, .upload-controls button {
+      padding: 10px 16px; border-radius: 8px; font-size: 14px;
+    }
+    .upload-controls select { border: 2px solid #e0e0e0; outline: none; flex: 1; min-width: 150px; }
+    .upload-controls button {
+      background: #667eea; color: #fff; border: none; cursor: pointer; font-weight: 600;
+    }
+    .upload-controls button:disabled { background: #ccc; cursor: not-allowed; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; color: #888; font-weight: 600; padding: 8px 12px; border-bottom: 2px solid #eee; }
+    td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; }
+    .status-active { color: #28a745; font-weight: 600; }
+    .status-expired { color: #dc3545; font-weight: 600; }
+    .btn-delete {
+      background: #dc3545; color: #fff; border: none; padding: 4px 10px;
+      border-radius: 4px; cursor: pointer; font-size: 12px;
+    }
+    .btn-delete:hover { background: #c82333; }
+
+    .message {
+      padding: 10px 16px; border-radius: 8px; font-size: 13px;
+      margin-bottom: 12px; display: none;
+    }
+    .message.success { background: #d4edda; color: #155724; display: block; }
+    .message.error { background: #f8d7da; color: #721c24; display: block; }
+
+    .loading { text-align: center; color: #888; padding: 20px; }
+    .empty { text-align: center; color: #aaa; padding: 20px; font-style: italic; }
+
+    .tabs { display: flex; gap: 0; margin-bottom: 20px; }
+    .tab {
+      padding: 10px 20px; cursor: pointer; border: none; background: #e9ecef;
+      font-size: 14px; font-weight: 600; color: #666;
+    }
+    .tab:first-child { border-radius: 8px 0 0 8px; }
+    .tab:last-child { border-radius: 0 8px 8px 0; }
+    .tab.active { background: #667eea; color: #fff; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Hotel Concierge Admin</h1>
+    <p class="subtitle">Dokumente verwalten und Gaste-Zugange uberwachen</p>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="upload">Dokumente hochladen</button>
+      <button class="tab" data-tab="documents">Dokumente</button>
+      <button class="tab" data-tab="guests">Gaste</button>
+    </div>
+
+    <!-- Upload Tab -->
+    <div id="tab-upload" class="tab-content active">
+      <div class="section">
+        <h2>Dokument hochladen</h2>
+        <div id="uploadMsg" class="message"></div>
+        <div class="upload-zone" id="dropZone">
+          <p>Datei hierher ziehen oder klicken zum Auswahlen</p>
+          <p class="formats">Unterstutzt: PDF, DOCX, TXT, MD, CSV (max. 20 MB)</p>
+          <input type="file" id="fileInput" accept=".pdf,.docx,.txt,.md,.csv" style="display:none">
+        </div>
+        <div id="selectedFile" style="margin-bottom:12px;font-size:13px;color:#555;"></div>
+        <div class="upload-controls">
+          <select id="category">
+            <option value="hotel_info">Hotel Info</option>
+            <option value="events">Events & Veranstaltungen</option>
+            <option value="faq">FAQ</option>
+            <option value="local">Lokale Sehenswurdigkeiten</option>
+            <option value="dining">Restaurants & Gastronomie</option>
+            <option value="transport">Transport & Anfahrt</option>
+            <option value="other">Sonstiges</option>
+          </select>
+          <button id="uploadBtn" disabled>Hochladen & Verarbeiten</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Documents Tab -->
+    <div id="tab-documents" class="tab-content">
+      <div class="section">
+        <h2>Hochgeladene Dokumente</h2>
+        <div id="docsLoading" class="loading">Ladt...</div>
+        <table id="docsTable" style="display:none">
+          <thead><tr><th>Datei</th><th>Kategorie</th><th>Chunks</th><th>Datum</th><th></th></tr></thead>
+          <tbody id="docsBody"></tbody>
+        </table>
+        <div id="docsEmpty" class="empty" style="display:none">Keine Dokumente vorhanden.</div>
+      </div>
+    </div>
+
+    <!-- Guests Tab -->
+    <div id="tab-guests" class="tab-content">
+      <div class="section">
+        <h2>Registrierte Gaste</h2>
+        <div id="guestsLoading" class="loading">Ladt...</div>
+        <table id="guestsTable" style="display:none">
+          <thead><tr><th>Telefon</th><th>Status</th><th>Zugang</th><th>Registriert</th><th>Lauft ab</th><th></th></tr></thead>
+          <tbody id="guestsBody"></tbody>
+        </table>
+        <div id="guestsEmpty" class="empty" style="display:none">Keine Gaste registriert.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+        document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+        tab.classList.add('active');
+        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+        if (tab.dataset.tab === 'documents') loadDocuments();
+        if (tab.dataset.tab === 'guests') loadGuests();
+      });
+    });
+
+    // File upload
+    var dropZone = document.getElementById('dropZone');
+    var fileInput = document.getElementById('fileInput');
+    var uploadBtn = document.getElementById('uploadBtn');
+    var selectedFileEl = document.getElementById('selectedFile');
+    var selectedFile = null;
+
+    dropZone.addEventListener('click', function() { fileInput.click(); });
+    dropZone.addEventListener('dragover', function(e) { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', function() { dropZone.classList.remove('dragover'); });
+    dropZone.addEventListener('drop', function(e) {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length > 0) setSelectedFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', function() {
+      if (fileInput.files.length > 0) setSelectedFile(fileInput.files[0]);
+    });
+
+    function setSelectedFile(file) {
+      selectedFile = file;
+      selectedFileEl.textContent = 'Ausgewahlt: ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+      uploadBtn.disabled = false;
+    }
+
+    uploadBtn.addEventListener('click', async function() {
+      if (!selectedFile) return;
+      var msgEl = document.getElementById('uploadMsg');
+      uploadBtn.disabled = true;
+      uploadBtn.textContent = 'Verarbeitet...';
+      msgEl.style.display = 'none';
+
+      var formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('category', document.getElementById('category').value);
+
+      try {
+        var res = await fetch('/concierge/admin/upload', { method: 'POST', body: formData });
+        var data = await res.json();
+        if (data.success) {
+          msgEl.className = 'message success';
+          msgEl.textContent = data.message;
+          selectedFile = null;
+          selectedFileEl.textContent = '';
+          fileInput.value = '';
+        } else {
+          msgEl.className = 'message error';
+          msgEl.textContent = data.error;
+        }
+      } catch (err) {
+        msgEl.className = 'message error';
+        msgEl.textContent = 'Upload fehlgeschlagen.';
+      }
+      msgEl.style.display = 'block';
+      uploadBtn.disabled = false;
+      uploadBtn.textContent = 'Hochladen & Verarbeiten';
+    });
+
+    // Safe DOM-based table rendering (no innerHTML with untrusted content)
+    function createTextCell(text) {
+      var td = document.createElement('td');
+      td.textContent = text;
+      return td;
+    }
+
+    // Load documents
+    async function loadDocuments() {
+      var loading = document.getElementById('docsLoading');
+      var table = document.getElementById('docsTable');
+      var empty = document.getElementById('docsEmpty');
+      var body = document.getElementById('docsBody');
+      loading.style.display = 'block';
+      table.style.display = 'none';
+      empty.style.display = 'none';
+
+      try {
+        var res = await fetch('/concierge/admin/documents');
+        var data = await res.json();
+        loading.style.display = 'none';
+
+        if (!data.documents || data.documents.length === 0) {
+          empty.style.display = 'block';
+          return;
+        }
+
+        // Clear existing rows safely
+        while (body.firstChild) body.removeChild(body.firstChild);
+
+        data.documents.forEach(function(doc) {
+          var tr = document.createElement('tr');
+          tr.appendChild(createTextCell(doc.source_file));
+          tr.appendChild(createTextCell(doc.category));
+          tr.appendChild(createTextCell(String(doc.chunk_count)));
+          tr.appendChild(createTextCell(new Date(doc.upload_date).toLocaleDateString('de-DE')));
+
+          var actionTd = document.createElement('td');
+          var delBtn = document.createElement('button');
+          delBtn.className = 'btn-delete';
+          delBtn.textContent = 'Loschen';
+          delBtn.addEventListener('click', function() { deleteDoc(doc.document_id); });
+          actionTd.appendChild(delBtn);
+          tr.appendChild(actionTd);
+
+          body.appendChild(tr);
+        });
+
+        table.style.display = 'table';
+      } catch (err) {
+        loading.textContent = 'Fehler beim Laden.';
+      }
+    }
+
+    async function deleteDoc(docId) {
+      if (!confirm('Dokument wirklich loschen?')) return;
+      await fetch('/concierge/admin/documents/' + encodeURIComponent(docId), { method: 'DELETE' });
+      loadDocuments();
+    }
+
+    // Load guests
+    async function loadGuests() {
+      var loading = document.getElementById('guestsLoading');
+      var table = document.getElementById('guestsTable');
+      var empty = document.getElementById('guestsEmpty');
+      var body = document.getElementById('guestsBody');
+      loading.style.display = 'block';
+      table.style.display = 'none';
+      empty.style.display = 'none';
+
+      try {
+        var res = await fetch('/concierge/admin/guests');
+        var data = await res.json();
+        loading.style.display = 'none';
+
+        if (!data.guests || data.guests.length === 0) {
+          empty.style.display = 'block';
+          return;
+        }
+
+        while (body.firstChild) body.removeChild(body.firstChild);
+
+        data.guests.forEach(function(g) {
+          var tr = document.createElement('tr');
+          tr.appendChild(createTextCell(g.phone_number));
+
+          var statusTd = document.createElement('td');
+          var statusSpan = document.createElement('span');
+          statusSpan.className = g.active ? 'status-active' : 'status-expired';
+          statusSpan.textContent = g.active ? 'Aktiv' : 'Abgelaufen';
+          statusTd.appendChild(statusSpan);
+          tr.appendChild(statusTd);
+
+          tr.appendChild(createTextCell(g.access_days + ' Tag(e)'));
+          tr.appendChild(createTextCell(new Date(g.registered_at).toLocaleString('de-DE')));
+          tr.appendChild(createTextCell(new Date(g.expires_at).toLocaleString('de-DE')));
+
+          var actionTd = document.createElement('td');
+          if (g.active) {
+            var delBtn = document.createElement('button');
+            delBtn.className = 'btn-delete';
+            delBtn.textContent = 'Entfernen';
+            delBtn.addEventListener('click', function() { deleteGuest(g.phone_number); });
+            actionTd.appendChild(delBtn);
+          }
+          tr.appendChild(actionTd);
+
+          body.appendChild(tr);
+        });
+
+        table.style.display = 'table';
+      } catch (err) {
+        loading.textContent = 'Fehler beim Laden.';
+      }
+    }
+
+    async function deleteGuest(phone) {
+      if (!confirm('Gast wirklich entfernen?')) return;
+      await fetch('/concierge/admin/guests/' + encodeURIComponent(phone), { method: 'DELETE' });
+      loadGuests();
+    }
+  </script>
+</body>
+</html>

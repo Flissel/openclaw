@@ -1,0 +1,52 @@
+{
+  "gateway": {
+    "port": 18789,
+    "mode": "local"
+  },
+  "channels": {
+    "whatsapp": {
+      "enabled": true,
+      "dmPolicy": "allowlist",
+      "allowFrom": [],
+      "groupPolicy": "allowlist",
+      "groupAllowFrom": [],
+      "markdown": {
+        "enabled": true
+      },
+      "blockStreaming": true,
+      "blockStreamingCoalesce": {
+        "maxWaitMs": 3000
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": "ollama/llama3.1:8b"
+    }
+  },
+  "plugins": {
+    "entries": {
+      "hotel-concierge": {
+        "enabled": true,
+        "config": {
+          "qdrantUrl": "http://qdrant:6333",
+          "qdrantCollection": "hotel_knowledge",
+          "ollamaUrl": "http://host.docker.internal:11434",
+          "embeddingModel": "nomic-embed-text",
+          "embeddingDimensions": 768,
+          "hotelId": "wasserburg",
+          "maxAccessDays": 4,
+          "ragTopK": 5,
+          "ragMinScore": 0.55,
+          "language": "de"
+        }
+      },
+      "ollama": {
+        "enabled": true,
+        "config": {
+          "baseUrl": "http://host.docker.internal:11434"
+        }
+      }
+    }
+  }
+}
