@@ -1,4 +1,12 @@
 {
+  "meta": {
+    "lastTouchedVersion": "2026.3.13",
+    "lastTouchedAt": "2026-04-11T17:46:22.732Z"
+  },
+  "browser": {
+    "executablePath": "/usr/local/bin/chromium",
+    "noSandbox": true
+  },
   "acp": {
     "enabled": true,
     "dispatch": {
@@ -39,9 +47,5 @@
         "enabled": true
       }
     }
-  },
-  "meta": {
-    "lastTouchedVersion": "2026.3.13",
-    "lastTouchedAt": "2026-04-11T16:36:27.377Z"
   }
 }

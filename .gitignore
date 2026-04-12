@@ -132,3 +132,16 @@ ui/src/ui/theme-variants.browser.test.ts
 ui/src/ui/__screenshots__/navigation.browser.test.ts/control-UI-routing-auto-scrolls-chat-history-to-the-latest-message-1.png
 ui/src/ui/__screenshots__/navigation.browser.test.ts/control-UI-routing-auto-scrolls-chat-history-to-the-latest-message-1.png
 ui/src/ui/__screenshots__/navigation.browser.test.ts/control-UI-routing-auto-scrolls-chat-history-to-the-latest-message-1.png
+
+# Runtime-generated state
+.env.sanitized
+config/*.bak*
+config/update-check.json
+config/logs/
+config/agents/
+config/browser/
+config/canvas/
+config/cron/
+config/devices/
+config/identity/
+workspace/
