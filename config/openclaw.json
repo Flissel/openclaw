@@ -24,7 +24,7 @@
   "agents": {
     "defaults": {
       "model": {
-        "primary": "anthropic/claude-haiku-4-5"
+        "primary": "anthropic/claude-opus-4-7"
       }
     }
   },
@@ -44,7 +44,20 @@
   "plugins": {
     "entries": {
       "acpx": {
-        "enabled": true
+        "enabled": true,
+        "config": {
+          "mcpServers": {
+            "openfang": {
+              "command": "python3",
+              "args": [
+                "/home/node/.openclaw/mcp_stdio_bridge.py"
+              ],
+              "env": {
+                "OPENFANG_MCP_URL": "http://host.docker.internal:4200/mcp"
+              }
+            }
+          }
+        }
       }
     }
   }
