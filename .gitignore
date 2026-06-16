@@ -145,3 +145,7 @@ config/cron/
 config/devices/
 config/identity/
 workspace/
+
+# Graphify code-graph output (local dev tool, ~MB) — rebuilt via `graphify update .`, never commit.
+graphify-out/
+.graphifyignore
