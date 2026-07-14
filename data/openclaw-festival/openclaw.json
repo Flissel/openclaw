@@ -1,0 +1,43 @@
+{
+  "gateway": {
+    "port": 18789,
+    "mode": "local",
+    "auth": {
+      "token": "${OPENCLAW_GATEWAY_TOKEN}"
+    }
+  },
+  "channels": {
+    "whatsapp": {
+      "enabled": true,
+      "dmPolicy": "allowlist",
+      "allowFrom": [],
+      "groupPolicy": "disabled"
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": "ollama/llama3.1:8b"
+    }
+  },
+  "plugins": {
+    "entries": {
+      "ollama": {
+        "enabled": true,
+        "config": {
+          "baseUrl": "http://host.docker.internal:11434"
+        }
+      }
+    }
+  },
+  "mcp": {
+    "servers": {
+      "festival-tasks": {
+        "url": "${FESTIVAL_MCP_URL}",
+        "transport": "streamable-http",
+        "headers": {
+          "Authorization": "Bearer ${MCP_SERVER_TOKEN}"
+        }
+      }
+    }
+  }
+}
